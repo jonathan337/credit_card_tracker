@@ -14,7 +14,7 @@ interface EditCardFormProps {
 export default function EditCardForm({ card, onClose, onEditCard }: EditCardFormProps) {
   const [cardNumber, setCardNumber] = useState(card.card_number)
   const [cardholderName, setCardholderName] = useState(card.cardholder_name)
-  const [cycleDate, setCycleDate] = useState(card.cycle_date.toString())
+  const [cycleDate, setCycleDate] = useState(card.cycle_date?.toString() ?? '1')
   const [ttdLimit, setTtdLimit] = useState(card.ttd_limit.toString())
   const [usdLimit, setUsdLimit] = useState(card.usd_limit.toString())
 

@@ -8,14 +8,16 @@ import { Card } from '@/types/database'
 interface AddCardFormProps {
   onClose: () => void
   onAddCard: (card: Omit<Card, 'id' | 'user_id' | 'created_at'>) => Promise<void>
+  card?: Card | null;
 }
 
-export default function AddCardForm({ onClose, onAddCard }: AddCardFormProps) {
-  const [cardNumber, setCardNumber] = useState('')
-  const [cardholderName, setCardholderName] = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [ttdLimit, setTtdLimit] = useState('')
-  const [usdLimit, setUsdLimit] = useState('')
+export default function AddCardForm({ onClose, onAddCard, card }: AddCardFormProps) {
+  const [cardNumber, setCardNumber] = useState(card?.card_number ?? '')
+  const [cardholderName, setCardholderName] = useState(card?.cardholder_name ?? '')
+  const [dueDate, setDueDate] = useState(card?.due_date?.toString() ?? '')
+  const [ttdLimit, setTtdLimit] = useState((card?.ttd_limit ?? 0).toString())
+  const [usdLimit, setUsdLimit] = useState((card?.usd_limit ?? 0).toString())
+  const [cycleDate, setCycleDate] = useState(card?.cycle_date?.toString() ?? '1')
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,7 +29,8 @@ export default function AddCardForm({ onClose, onAddCard }: AddCardFormProps) {
         cardholder_name: cardholderName,
         due_date: dueDate,
         ttd_limit: parseFloat(ttdLimit),
-        usd_limit: parseFloat(usdLimit)
+        usd_limit: parseFloat(usdLimit),
+        cycle_date: parseInt(cycleDate, 10)
       })
       onClose()
     } catch (error) {
@@ -105,6 +108,19 @@ export default function AddCardForm({ onClose, onAddCard }: AddCardFormProps) {
                 type="number"
                 value={usdLimit}
                 onChange={(e) => setUsdLimit(e.target.value)}
+                className="col-span-3"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="cycleDate" className="text-right">
+                Cycle Date
+              </Label>
+              <Input
+                id="cycleDate"
+                type="number"
+                value={cycleDate}
+                onChange={(e) => setCycleDate(e.target.value)}
                 className="col-span-3"
                 required
               />

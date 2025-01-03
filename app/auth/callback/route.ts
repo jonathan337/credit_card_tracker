@@ -2,10 +2,13 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   try {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
+    const redirect = requestUrl.searchParams.get('redirect') || '/dashboard'
 
     if (!code) {
       throw new Error('No code provided')
@@ -20,16 +23,17 @@ export async function GET(request: Request) {
       throw error
     }
 
-    // URL to redirect to after sign in process completes
-    return NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
+    // Redirect to the intended destination or dashboard
+    return NextResponse.redirect(new URL(redirect, requestUrl.origin))
   } catch (error) {
     console.error('Auth callback error:', error)
     
-    // Redirect to login page with error
-    const baseUrl = new URL(request.url).origin
-    return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent('Authentication failed')}`, baseUrl)
+    // Clear any existing session cookies
+    const response = NextResponse.redirect(
+      new URL('/login?error=Authentication failed', new URL(request.url).origin)
     )
+    response.cookies.delete('supabase-auth-token')
+    return response
   }
 }
 

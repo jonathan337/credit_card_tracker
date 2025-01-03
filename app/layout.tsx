@@ -4,6 +4,8 @@ import { Header } from '@/components/Header'
 import { Providers } from '@/components/Providers'
 import { ThemeProvider } from '@/components/theme-provider'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { Suspense } from 'react'
+import { LoadingScreen } from '@/components/LoadingScreen'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,8 +31,10 @@ export default function RootLayout({
           <ErrorBoundary>
             <Providers>
               <div className="min-h-screen bg-background">
-                <Header />
-                {children}
+                <Suspense fallback={<LoadingScreen />}>
+                  <Header />
+                  {children}
+                </Suspense>
               </div>
             </Providers>
           </ErrorBoundary>

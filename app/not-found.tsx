@@ -1,11 +1,11 @@
 import { Suspense } from 'react'
-import { HomeContent } from './home-content'
+import { NotFoundContent } from './not-found-content'
 import { LoadingScreen } from '@/components/LoadingScreen'
 
-export default function HomePage() {
+export default function NotFoundPage() {
   return (
     <Suspense fallback={<LoadingScreen />}>
-      <HomeContent />
+      <NotFoundContent />
     </Suspense>
   )
 }

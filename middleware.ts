@@ -2,25 +2,45 @@ import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Define public routes that don't require authentication
+const publicRoutes = ['/', '/login', '/register', '/auth/callback']
+
 export async function middleware(request: NextRequest) {
-  // Create a response early
   const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req: request, res })
+  const { pathname } = new URL(request.url)
 
   try {
-    const supabase = createMiddlewareClient({ req: request, res })
-    
-    // Refresh session if expired - required for Server Components
+    // Refresh session if expired
     const { data: { session }, error } = await supabase.auth.getSession()
-    
-    if (error) {
-      throw error
+
+    // Handle authentication for protected routes
+    const isPublicRoute = publicRoutes.includes(pathname)
+    const isAuthRoute = pathname.startsWith('/auth/')
+    const isApiRoute = pathname.startsWith('/api/')
+
+    // Don't redirect API routes or auth callback routes
+    if (isApiRoute || isAuthRoute) {
+      return res
+    }
+
+    // Redirect authenticated users away from public routes
+    if (session && isPublicRoute) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
+    // Redirect unauthenticated users to login from protected routes
+    if (!session && !isPublicRoute) {
+      const redirectUrl = new URL('/login', request.url)
+      redirectUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(redirectUrl)
     }
 
     return res
   } catch (error) {
     console.error('Middleware error:', error)
     
-    // For API routes, return JSON error
+    // Don't redirect on API routes
     if (request.url.includes('/api/')) {
       return NextResponse.json(
         { error: 'Internal Server Error' },
@@ -28,23 +48,23 @@ export async function middleware(request: NextRequest) {
       )
     }
 
-    // For page routes, redirect to error page
-    return NextResponse.redirect(new URL('/error', request.url))
+    // Clear cookies and redirect to login on critical errors
+    const response = NextResponse.redirect(new URL('/login', request.url))
+    response.cookies.delete('supabase-auth-token')
+    return response
   }
 }
 
-// Update matcher to exclude api routes that don't need auth
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 }
 

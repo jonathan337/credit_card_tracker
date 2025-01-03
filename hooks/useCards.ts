@@ -22,7 +22,7 @@ export function useCards() {
 
       return data?.map(card => ({
         ...card,
-        daysUntilReset: card.cycle_date ? calculateDaysUntilReset(card.cycle_date) : null
+        daysUntilReset: calculateDaysUntilReset(card.cycle_date)
       })) || []
     },
     enabled: !!user,
@@ -44,44 +44,11 @@ export function useCards() {
     },
   })
 
-  const editCard = useMutation({
-    mutationFn: async (card: Partial<Card> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('cards')
-        .update(card)
-        .eq('id', card.id)
-        .select()
-        .single()
-
-      if (error) throw error
-      return data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cards', user?.id] })
-    },
-  })
-
-  const deleteCard = useMutation({
-    mutationFn: async (cardId: string) => {
-      const { error } = await supabase
-        .from('cards')
-        .delete()
-        .eq('id', cardId)
-
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cards', user?.id] })
-    },
-  })
-
   return {
     cards,
     isLoading,
     error: error as Error | null,
     addCard: addCard.mutate,
-    editCard: editCard.mutate,
-    deleteCard: deleteCard.mutate,
   }
 }
 

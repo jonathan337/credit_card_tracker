@@ -6,7 +6,7 @@ export interface Card {
   due_date: string
   ttd_limit: number
   usd_limit: number
-  cycle_date?: number
+  cycle_date: number
   created_at: string
 }
 

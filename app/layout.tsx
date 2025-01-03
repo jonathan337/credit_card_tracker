@@ -3,9 +3,6 @@ import { Inter } from 'next/font/google'
 import { Header } from '@/components/Header'
 import { Providers } from '@/components/Providers'
 import { ThemeProvider } from '@/components/theme-provider'
-import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { Suspense } from 'react'
-import { LoadingScreen } from '@/components/LoadingScreen'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,16 +25,12 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <ErrorBoundary>
-            <Providers>
-              <div className="min-h-screen bg-background">
-                <Suspense fallback={<LoadingScreen />}>
-                  <Header />
-                  {children}
-                </Suspense>
-              </div>
-            </Providers>
-          </ErrorBoundary>
+          <Providers>
+            <div className="min-h-screen bg-background">
+              <Header />
+              {children}
+            </div>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

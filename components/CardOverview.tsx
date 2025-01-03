@@ -10,10 +10,10 @@ import { useCards } from '@/hooks/useCards'
 import { Card as CardType } from '@/types/database'
 
 export default function CardOverview() {
-  const { cards, isLoading, error, addCard } = useCards()
+  const { cards, loading, error, addCard } = useCards()
   const [showAddCard, setShowAddCard] = useState(false)
 
-  if (isLoading) {
+  if (loading) {
     return <div>Loading cards...</div>
   }
 
@@ -21,7 +21,7 @@ export default function CardOverview() {
     return (
       <Alert variant="destructive">
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
+        <AlertDescription>{error}</AlertDescription>
       </Alert>
     )
   }
@@ -50,8 +50,8 @@ export default function CardOverview() {
           <CardContent>
             <ul>
               {cards.map(card => (
-                <li key={card.id} className="mb-2 flex justify-between items-center">
-                  <span>**** **** **** {card.card_number.slice(-4)}</span>
+                <li key={card.id} className="mb-2">
+                  **** **** **** {card.card_number.slice(-4)}
                 </li>
               ))}
             </ul>

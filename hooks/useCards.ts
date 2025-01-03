@@ -12,14 +12,19 @@ export function useCards() {
   const { data: cards = [], isLoading, error } = useQuery({
     queryKey: ['cards', user?.id],
     queryFn: async () => {
+      console.log('Fetching cards for user:', user?.id)
       const { data, error } = await supabase
         .from('cards')
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Error fetching cards:', error)
+        throw error
+      }
 
+      console.log('Fetched cards:', data)
       return data?.map(card => ({
         ...card,
         daysUntilReset: calculateDaysUntilReset(card.cycle_date)
@@ -30,13 +35,19 @@ export function useCards() {
 
   const addCard = useMutation({
     mutationFn: async (card: Omit<Card, 'id' | 'user_id' | 'created_at'>) => {
+      console.log('Adding card:', card)
       const { data, error } = await supabase
         .from('cards')
         .insert([{ ...card, user_id: user?.id }])
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Error adding card:', error)
+        throw error
+      }
+
+      console.log('Added card:', data)
       return data
     },
     onSuccess: () => {

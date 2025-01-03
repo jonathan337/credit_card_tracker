@@ -3,46 +3,39 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card } from '@/types/database'
+import { Card } from '@/hooks/useCards'
 
-interface AddCardFormProps {
+interface EditCardFormProps {
   onClose: () => void
-  onAddCard: (card: Omit<Card, 'id' | 'user_id' | 'created_at'>) => Promise<void>
+  onUpdateCard: (card: Card) => void
+  card: Card
 }
 
-export default function AddCardForm({ onClose, onAddCard }: AddCardFormProps) {
-  const [cardNumber, setCardNumber] = useState('')
-  const [cardholderName, setCardholderName] = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [ttdLimit, setTtdLimit] = useState('')
-  const [usdLimit, setUsdLimit] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+export default function EditCardForm({ onClose, onUpdateCard, card }: EditCardFormProps) {
+  const [cardNumber, setCardNumber] = useState(card.cardNumber)
+  const [cardholderName, setCardholderName] = useState(card.cardholderName)
+  const [dueDate, setDueDate] = useState(card.dueDate)
+  const [ttdLimit, setTtdLimit] = useState(card.ttdLimit.toString())
+  const [usdLimit, setUsdLimit] = useState(card.usdLimit.toString())
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    try {
-      await onAddCard({
-        card_number: cardNumber,
-        cardholder_name: cardholderName,
-        due_date: dueDate,
-        ttd_limit: parseFloat(ttdLimit),
-        usd_limit: parseFloat(usdLimit)
-      })
-      onClose()
-    } catch (error) {
-      console.error('Error adding card:', error)
-      // You might want to show an error message to the user here
-    } finally {
-      setIsLoading(false)
-    }
+    onUpdateCard({
+      ...card,
+      cardNumber,
+      cardholderName,
+      dueDate,
+      ttdLimit: parseFloat(ttdLimit),
+      usdLimit: parseFloat(usdLimit)
+    })
+    onClose()
   }
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Card</DialogTitle>
+          <DialogTitle>Edit Card</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
@@ -111,9 +104,7 @@ export default function AddCardForm({ onClose, onAddCard }: AddCardFormProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Adding...' : 'Add Card'}
-            </Button>
+            <Button type="submit">Update Card</Button>
           </DialogFooter>
         </form>
       </DialogContent>

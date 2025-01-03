@@ -1,12 +1,7 @@
-import { Suspense } from 'react'
-import { DashboardContent } from './dashboard-content'
-import { LoadingScreen } from '@/components/LoadingScreen'
+import { DashboardClient } from './client'
 
+// This is a Server Component
 export default function DashboardPage() {
-  return (
-    <Suspense fallback={<LoadingScreen />}>
-      <DashboardContent />
-    </Suspense>
-  )
+  return <DashboardClient />
 }
 

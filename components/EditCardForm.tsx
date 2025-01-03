@@ -3,30 +3,30 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card } from '@/hooks/useCards'
+import { Card } from '@/types/database'
 
 interface EditCardFormProps {
-  onClose: () => void
-  onUpdateCard: (card: Card) => void
   card: Card
+  onClose: () => void
+  onEditCard: (card: Partial<Card> & { id: string }) => void
 }
 
-export default function EditCardForm({ onClose, onUpdateCard, card }: EditCardFormProps) {
-  const [cardNumber, setCardNumber] = useState(card.cardNumber)
-  const [cardholderName, setCardholderName] = useState(card.cardholderName)
-  const [dueDate, setDueDate] = useState(card.dueDate)
-  const [ttdLimit, setTtdLimit] = useState(card.ttdLimit.toString())
-  const [usdLimit, setUsdLimit] = useState(card.usdLimit.toString())
+export default function EditCardForm({ card, onClose, onEditCard }: EditCardFormProps) {
+  const [cardNumber, setCardNumber] = useState(card.card_number)
+  const [cardholderName, setCardholderName] = useState(card.cardholder_name)
+  const [cycleDate, setCycleDate] = useState(card.cycle_date.toString())
+  const [ttdLimit, setTtdLimit] = useState(card.ttd_limit.toString())
+  const [usdLimit, setUsdLimit] = useState(card.usd_limit.toString())
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onUpdateCard({
-      ...card,
-      cardNumber,
-      cardholderName,
-      dueDate,
-      ttdLimit: parseFloat(ttdLimit),
-      usdLimit: parseFloat(usdLimit)
+    onEditCard({
+      id: card.id,
+      card_number: cardNumber,
+      cardholder_name: cardholderName,
+      cycle_date: parseInt(cycleDate),
+      ttd_limit: parseFloat(ttdLimit),
+      usd_limit: parseFloat(usdLimit)
     })
     onClose()
   }
@@ -64,14 +64,16 @@ export default function EditCardForm({ onClose, onUpdateCard, card }: EditCardFo
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="dueDate" className="text-right">
-                Due Date
+              <Label htmlFor="cycleDate" className="text-right">
+                Cycle Date
               </Label>
               <Input
-                id="dueDate"
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+                id="cycleDate"
+                type="number"
+                min="1"
+                max="31"
+                value={cycleDate}
+                onChange={(e) => setCycleDate(e.target.value)}
                 className="col-span-3"
                 required
               />
@@ -83,6 +85,7 @@ export default function EditCardForm({ onClose, onUpdateCard, card }: EditCardFo
               <Input
                 id="ttdLimit"
                 type="number"
+                step="0.01"
                 value={ttdLimit}
                 onChange={(e) => setTtdLimit(e.target.value)}
                 className="col-span-3"
@@ -96,6 +99,7 @@ export default function EditCardForm({ onClose, onUpdateCard, card }: EditCardFo
               <Input
                 id="usdLimit"
                 type="number"
+                step="0.01"
                 value={usdLimit}
                 onChange={(e) => setUsdLimit(e.target.value)}
                 className="col-span-3"
@@ -104,7 +108,7 @@ export default function EditCardForm({ onClose, onUpdateCard, card }: EditCardFo
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Update Card</Button>
+            <Button type="submit">Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -12,22 +12,17 @@ export function useCards() {
   const { data: cards = [], isLoading, error } = useQuery({
     queryKey: ['cards', user?.id],
     queryFn: async () => {
-      console.log('Fetching cards for user:', user?.id)
       const { data, error } = await supabase
         .from('cards')
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Error fetching cards:', error)
-        throw error
-      }
+      if (error) throw error
 
-      console.log('Fetched cards:', data)
       return data?.map(card => ({
         ...card,
-        daysUntilReset: calculateDaysUntilReset(card.cycle_date)
+        daysUntilReset: card.cycle_date ? calculateDaysUntilReset(card.cycle_date) : null
       })) || []
     },
     enabled: !!user,
@@ -35,20 +30,45 @@ export function useCards() {
 
   const addCard = useMutation({
     mutationFn: async (card: Omit<Card, 'id' | 'user_id' | 'created_at'>) => {
-      console.log('Adding card:', card)
       const { data, error } = await supabase
         .from('cards')
         .insert([{ ...card, user_id: user?.id }])
         .select()
         .single()
 
-      if (error) {
-        console.error('Error adding card:', error)
-        throw error
-      }
-
-      console.log('Added card:', data)
+      if (error) throw error
       return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards', user?.id] })
+    },
+  })
+
+  const editCard = useMutation({
+    mutationFn: async (card: Partial<Card> & { id: string }) => {
+      const { data, error } = await supabase
+        .from('cards')
+        .update(card)
+        .eq('id', card.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cards', user?.id] })
+    },
+  })
+
+  const deleteCard = useMutation({
+    mutationFn: async (cardId: string) => {
+      const { error } = await supabase
+        .from('cards')
+        .delete()
+        .eq('id', cardId)
+
+      if (error) throw error
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cards', user?.id] })
@@ -60,6 +80,8 @@ export function useCards() {
     isLoading,
     error: error as Error | null,
     addCard: addCard.mutate,
+    editCard: editCard.mutate,
+    deleteCard: deleteCard.mutate,
   }
 }
 

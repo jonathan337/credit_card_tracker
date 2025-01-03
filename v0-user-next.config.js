@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  images: {
-    unoptimized: true,
-  },
-  basePath: '/credit_card_tracker',
-  assetPrefix: '/credit_card_tracker/',
-  trailingSlash: true, // Add this to ensure proper static file generation
+  reactStrictMode: true,
+  // Remove or comment out these lines if they exist
+  // basePath: '/credit-card-forex-tracker',
+  // assetPrefix: '/credit-card-forex-tracker/',
 }
 
 module.exports = nextConfig

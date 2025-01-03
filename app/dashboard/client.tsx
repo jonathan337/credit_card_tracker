@@ -74,7 +74,9 @@ export function DashboardClient() {
         ...card,
         utilized,
         utilizationPercentage: Math.min(utilizationPercentage, 100),
-        remainingLimit: card.usd_limit - utilized
+        remainingLimit: card.usd_limit - utilized,
+        cycle_date: card.cycle_date || 1, // Provide default value if cycle_date is null
+        daysUntilReset: card.cycle_date ? calculateDaysUntilReset(card.cycle_date) : null
       }
 
       if (!acc[card.cardholder_name]) {
@@ -103,7 +105,7 @@ export function DashboardClient() {
         utilizationPercentage: Math.min(totalUtilizationPercentage, 100),
         remainingLimit: totalLimit - totalUtilized,
         cycle_date: cardholderCards[0]?.cycle_date || 1,
-        daysUntilReset: Math.min(...cardholderCards.map(card => calculateDaysUntilReset(card.cycle_date) || 30))
+        daysUntilReset: Math.min(...cardholderCards.filter(card => card.daysUntilReset !== null).map(card => card.daysUntilReset || 30))
       } as typeof cardholderCards[0])
     })
 
